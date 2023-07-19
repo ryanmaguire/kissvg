@@ -1,7 +1,8 @@
 /*  Include guard to prevent including this file twice.                       */
-#ifndef _KISSVG_PEN_H_
-#define _KISSVG_PEN_H_
+#ifndef KISSVG_PEN_H
+#define KISSVG_PEN_H
 
+#include <libtmpl/include/tmpl_bool.h>
 #include "kissvg_defs.h"
 
 /******************************************************************************
@@ -48,7 +49,7 @@
  *      must called kissvg_DestroyColor when you are done with the color.     *
  ******************************************************************************/
 extern kissvg_Pen *kissvg_Create_Pen(double red, double green, double blue,
-                                     double linewidth, kissvg_Bool transparent,
+                                     double linewidth, tmpl_Bool transparent,
                                      double alpha);
 
 /******************************************************************************

@@ -1,8 +1,9 @@
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef _KISSVG_CIRCLE_H_
-#define _KISSVG_CIRCLE_H_
+#ifndef KISSVG_CIRCLE_H
+#define KISSVG_CIRCLE_H
 
+#include <libtmpl/include/tmpl_bool.h>
 #include "kissvg_defs.h"
 #include "kissvg.h"
 

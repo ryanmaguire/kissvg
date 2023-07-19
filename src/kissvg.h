@@ -39,14 +39,16 @@
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef _KISSVG_H_
-#define _KISSVG_H_
+#ifndef KISSVG_H
+#define KISSVG_H
+
+#include <libtmpl/include/tmpl_bool.h>
 
 /*  Most typedefs are here.                                                   */
 #include "kissvg_defs.h"
 
 /*  Math stuff here.                                                          */
-#include "kissvg_math.h"
+#include <libtmpl/include/tmpl_math.h>
 
 /*  We use cairo for producing .ps, .svg, .pdf, etc., files.                  */
 #include <cairo/cairo.h>
@@ -61,8 +63,7 @@
 #define kissvg_Default_Label_Font_Size 10
 #define kissvg_Default_Label_Baseline_Skip 12
 
-#include "kissvg_vector.h"
-#include "kissvg_matrix.h"
+#include <libtmpl/include/tmpl_vec2.h>
 #include "kissvg_pen.h"
 
 /******************************************************************************
@@ -108,7 +109,7 @@
 extern kissvg_Canvas *kissvg_Create_Canvas(double x_inches, double y_inches,
                                            double x_min, double x_max,
                                            double y_min, double y_max,
-                                           kissvg_Bool one_to_one_apect_ratio,
+                                           tmpl_Bool one_to_one_apect_ratio,
                                            kissvg_FileType filetype);
 
 /******************************************************************************
@@ -195,7 +196,7 @@ extern void kissvg_Destroy_Palette(kissvg_Palette *palette);
  ******************************************************************************/
 
 extern kissvg_Label2D *kissvg_Create_Label2D(const char *label_content,
-                                             kissvg_TwoVector anchor,
+                                             tmpl_TwoVector anchor,
                                              kissvg_Canvas *canvas);
 
 extern void kissvg_DestroyLabel2D(kissvg_Label2D *label);
@@ -204,10 +205,10 @@ extern void kissvg_ResetLabel2DContent(kissvg_Label2D *label,
                                        const char *label_content);
 
 extern void kissvg_Label2DSetAnchor(kissvg_Label2D *label,
-                                    kissvg_TwoVector anchor);
+                                    tmpl_TwoVector anchor);
 
 extern void kissvg_Label2DSetShift(kissvg_Label2D *label,
-                                   kissvg_TwoVector shift);
+                                   tmpl_TwoVector shift);
 
 extern void kissvg_Label2DSetMargins(kissvg_Label2D *label,
                                      double margins[4]);
@@ -237,10 +238,10 @@ extern void kissvg_DrawLabel2D(cairo_t *cr, kissvg_Label2D *label);
 #define kissvg_Path2D_Data(path) (path->data)
 #define kissvg_Path2D_Number_Of_Points(path) (path->N_Pts)
 
-extern kissvg_Path2D *kissvg_CreatePath2D(kissvg_TwoVector start,
+extern kissvg_Path2D *kissvg_CreatePath2D(tmpl_TwoVector start,
                                           kissvg_Palette *canvas);
 
-extern void kissvg_Append_Path2D(kissvg_Path2D *path, kissvg_TwoVector P);
+extern void kissvg_Append_Path2D(kissvg_Path2D *path, tmpl_TwoVector P);
 extern void kissvg_Close_Path2D(kissvg_Path2D *path);
 extern void kissvg_Destroy_Path2D(kissvg_Path2D **path_pointer);
 
@@ -253,12 +254,12 @@ extern void kissvg_Destroy_Path2D(kissvg_Path2D **path_pointer);
  ******************************************************************************/
 
 
-extern kissvg_Line2D *kissvg_CreateLineFromTwoPoints(kissvg_TwoVector P,
-                                                     kissvg_TwoVector Q,
+extern kissvg_Line2D *kissvg_CreateLineFromTwoPoints(tmpl_TwoVector P,
+                                                     tmpl_TwoVector Q,
                                                      kissvg_Palette *palette);
 
 extern kissvg_Line2D *
-kissvg_CreateLineFromPointAndTangent(kissvg_TwoVector P, kissvg_TwoVector V,
+kissvg_CreateLineFromPointAndTangent(tmpl_TwoVector P, tmpl_TwoVector V,
                                      kissvg_Palette *palette);
 
 extern void kissvg_Destroy_Line_2D(kissvg_Line2D *L);

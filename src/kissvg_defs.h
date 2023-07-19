@@ -57,8 +57,10 @@
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef _KISSVG_DEFS_H_
-#define _KISSVG_DEFS_H_
+#ifndef KISSVG_DEFS_H
+#define KISSVG_DEFS_H
+
+#include <libtmpl/include/tmpl_bool.h>
 
 /*  Enumeration for legal file outputs. Currently PostScript (.ps), Scalable  *
  *  Vector Graphics (.svg), and Portable Document Format (.pdf) are allowed.  */
@@ -124,7 +126,7 @@ typedef struct kissvg_Pen {
     double dat[3];
     double alpha;
     double linewidth;
-    kissvg_Bool has_transparency;
+    tmpl_Bool has_transparency;
 } kissvg_Pen;
 
 /*  Struct for adding labels to figures.                                      */
@@ -162,7 +164,7 @@ typedef struct kissvg_Arrow {
     double arrow_pos;
 
     /*  Boolean for determining if an error occured.                          */
-    kissvg_Bool error_occured;
+    tmpl_Bool error_occured;
 
     /*  An error message which is set by various functions if an error occurs.*/
     char *error_message;
@@ -183,7 +185,7 @@ typedef struct kissvg_Arrow {
 typedef struct kissvg_Palette {
 
     /*  Boolean for determining if there are lables along the path.           */
-    kissvg_Bool has_labels;
+    tmpl_Bool has_labels;
 
     /*  Pointer to the labels of the path.                                    */
     kissvg_Label2D **labels;
@@ -194,10 +196,10 @@ typedef struct kissvg_Palette {
     /*  Boolean for determining if the region enclosed should be filled in.   *
      *  Default is set to false. If this Boolean is set to true, the various  *
      *  drawing routines will automatically set is_closed to true.            */
-    kissvg_Bool has_fill_draw;
+    tmpl_Bool has_fill_draw;
 
     /*  Boolean for determining if the path has arrows on it.                 */
-    kissvg_Bool has_arrows;
+    tmpl_Bool has_arrows;
 
     /*  Pointer to the arrows stored on the path.                             */
     kissvg_Arrow **arrows;
@@ -221,7 +223,7 @@ typedef struct kissvg_Palette {
     double tick_finish;
 
     /*  Boolean for use of tick marks. Default is False.                      */
-    kissvg_Bool has_ticks;
+    tmpl_Bool has_ticks;
 
     /*  Boolean for only having ticks "above" the axis. For the x-axis, where *
      *  tick_start is to the left of tick_finish, the ticks will indeed be    *
@@ -229,10 +231,10 @@ typedef struct kissvg_Palette {
      *  ticks will point to the "left" since this is just a rotation of the   *
      *  x-axis. Keep this in mind when drawing. If you want up ticks for the  *
      *  x-axis but right ticks for the y-axis, use down_ticks for y.          */
-    kissvg_Bool up_ticks;
+    tmpl_Bool up_ticks;
 
     /*  Like up_ticks, but used to point the ticks "down".                    */
-    kissvg_Bool down_ticks;
+    tmpl_Bool down_ticks;
 
     /*  The distance between ticks. This should be either 0.25, 0.5, 1.0, or  *
      *  some integer. This is to get full use of tick_height,                 *
@@ -280,14 +282,14 @@ typedef struct kissvg_Path2D {
     unsigned long N_Pts;
 
     /*  Boolean for determining if an error occured.                          */
-    kissvg_Bool error_occured;
+    tmpl_Bool error_occured;
 
     /*  An error message which is set by various functions if an error occurs.*/
     char *error_message;
 
     /*  Boolean for determining if the object is meant to be closed or not.   *
      *  If you wish to use fill draw with the object, this must be true.      */
-    kissvg_Bool is_closed;
+    tmpl_Bool is_closed;
 
     /*  Data for how to draw the path and the geometry of the page.           */
     kissvg_Palette *palette;
@@ -306,12 +308,12 @@ typedef struct kissvg_Circle {
      *  scenarios the functions set the circle to be a line defined by a      *
      *  point P which lies on it, and its tangent vector V. The is_line       *
      *  is for determining if a circle is actually a line.                    */
-    kissvg_Bool is_line;
+    tmpl_Bool is_line;
     kissvg_TwoVector P;
     kissvg_TwoVector V;
 
     /*  Boolean for determining if an error occured.                          */
-    kissvg_Bool error_occured;
+    tmpl_Bool error_occured;
 
     /*  An error message which is set by various functions if an error occurs.*/
     char *error_message;
@@ -331,7 +333,7 @@ typedef struct kissvg_Line2D {
     kissvg_TwoVector V;
 
     /*  Boolean for determining if an error occured.                          */
-    kissvg_Bool error_occured;
+    tmpl_Bool error_occured;
 
     /*  An error message which is set by various functions if an error occurs.*/
     char *error_message;

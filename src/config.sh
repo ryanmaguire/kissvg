@@ -8,7 +8,7 @@ rm -f *.o
 
 echo "Compiling KissVG..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
-CompilerArgs2="-Wpedantic -Wmisleading-indentation"
+CompilerArgs2="-Wpedantic -Wmisleading-indentation -Werror"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition"
 CompilerArgs4="-Wstrict-prototypes -I../../ -DNDEBUG -g -fPIC -O2 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3 $CompilerArgs4"
@@ -22,7 +22,9 @@ echo -e "\t\t$CompilerArgs4"
 
 for filename in ./*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
+    if !($CC $CompilerArgs $filename); then
+        exit 1
+    fi
 done
 
 #   sharedobjectlist=""

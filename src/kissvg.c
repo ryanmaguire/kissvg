@@ -35,13 +35,12 @@
 /*  Useful string manipulating functions like strcpy and strlen found here.   */
 #include <string.h>
 
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_vec2.h>
+
 /*  The main headers for kissvg are located here.                             */
 #include "kissvg.h"
-
-/*  The above header includes the following, so directly including them is    *
- *  unnecessary:                                                              *
- *  #include <kissvg/src/kissvg_math.h>                                       *
- *  #include <kissvg/src/kissvg_bool.h>                                       */
 
 /*  Currently we use the cairo backends for producing the output files.       */
 #include <cairo/cairo.h>
@@ -89,7 +88,7 @@ static double __kissvg_Canvas_Y_Transform(kissvg_Canvas *canvas, double y)
 kissvg_Canvas *kissvg_Create_Canvas(double x_inches, double y_inches,
                                     double x_min, double x_max,
                                     double y_min, double y_max,
-                                    kissvg_Bool one_to_one_apect_ratio,
+                                    tmpl_Bool one_to_one_apect_ratio,
                                     kissvg_FileType filetype)
 {
     /*  Declare necessary variables.                                          */
@@ -276,7 +275,7 @@ static void __check_arrow_error(kissvg_Arrow *arrow, char *FuncName)
 }
 
 /*  Function for reversing the direction of an arrow head.                    */
-void kissvg_ArrowSetReverse(kissvg_Arrow *arrow, kissvg_Bool reverse)
+void kissvg_ArrowSetReverse(kissvg_Arrow *arrow, tmpl_Bool reverse)
 {
     /*  Check that the input arrow doesn't have errors.                       */
     __check_arrow_error(arrow, "kissvg_ArrowSetReverse");
@@ -335,7 +334,7 @@ kissvg_Arrow *kissvg_CreateArrow(double pos,
 {
     /*  Declare necessary variables.                                          */
     kissvg_Arrow *arrow;
-    kissvg_Bool reverse_arrow;
+    tmpl_Bool reverse_arrow;
     char *mes, **arrow_mes_pointer;
     long mes_len;
 
@@ -502,7 +501,7 @@ static void __check_path_error(kissvg_Path2D *path, char *FuncName)
  *  0 and 1. This represents a point by how far along the path it is. If it's *
  *  at the start, then t=0, the end has t=1, and the midpoint has t=0.5. This *
  *  function returns the actual Cartesian coordinates.                        */
-static kissvg_TwoVector __GetPos(kissvg_Path2D *path, double pos)
+static tmpl_TwoVector __GetPos(kissvg_Path2D *path, double pos)
 {
     double norm;
     double path_length;
@@ -510,8 +509,8 @@ static kissvg_TwoVector __GetPos(kissvg_Path2D *path, double pos)
     double current_length, pos_length;
     long n, N_Pts, current_pos;
 
-    kissvg_TwoVector P0, P1, Q, out;
-    kissvg_TwoVector *data;
+    tmpl_TwoVector P0, P1, Q, out;
+    tmpl_TwoVector *data;
 
     data = kissvg_Path2DData(path);
     N_Pts = kissvg_Path2DNumberOfPoints(path);
@@ -519,7 +518,7 @@ static kissvg_TwoVector __GetPos(kissvg_Path2D *path, double pos)
 
     P0 = kissvg_Path2DData(path)[0];
     P1 = kissvg_Path2DData(path)[1];
-    Q = kissvg_TwoVectorSubtract(P1, P0);
+    Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
     norm = kissvg_EuclideanNorm2D(Q);
     path_length = norm;
@@ -529,7 +528,7 @@ static kissvg_TwoVector __GetPos(kissvg_Path2D *path, double pos)
     {
         P0 = kissvg_Path2DData(path)[n];
         P1 = kissvg_Path2DData(path)[n+1];
-        Q = kissvg_TwoVectorSubtract(P1, P0);
+        Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
         norm = kissvg_EuclideanNorm2D(Q);
 
@@ -570,19 +569,20 @@ static kissvg_TwoVector __GetPos(kissvg_Path2D *path, double pos)
 
         P0 = kissvg_Path2DData(path)[current_pos];
         P1 = kissvg_Path2DData(path)[current_pos+1];
-        Q = kissvg_TwoVectorSubtract(P1, P0);
-        norm = kissvg_EuclideanNorm2D(Q);
+        Q = tmpl_2DDouble_Subtract(&P1, &P0);
+        norm = tmpl_2DDouble_L2_Norm(&Q);
 
         if (norm == 0.0)
             out = P0;
         else
         {
-            Q = kissvg_TwoVectorScale(1.0/norm, Q);
+            Q = tmpl_2DDouble_Scale(1.0/norm, &Q);
             norm = pos_length-path_norms[current_pos-1];
-            Q = kissvg_TwoVectorScale(norm, Q);
-            out  = kissvg_TwoVectorAdd(P0, Q);
+            Q = tmpl_2DDouble_Scale(norm, &Q);
+            out = tmpl_2DDouble_Add(&P0, &Q);
         }
     }
+
     free(path_norms);
     return out;
 }
@@ -649,11 +649,11 @@ void kissvg_Path2DAddArrow(kissvg_Path2D *path, double pos, double arrow_size,
     return;
 }
 
-kissvg_Path2D *kissvg_CreatePath2D(kissvg_TwoVector start,
+kissvg_Path2D *kissvg_CreatePath2D(tmpl_TwoVector start,
                                    kissvg_Canvas2D *canvas)
 {
     kissvg_Path2D *path;
-    kissvg_TwoVector *data;
+    tmpl_TwoVector *data;
     unsigned long *N_Pts_pointer;
 
     path = malloc(sizeof(*path));
@@ -699,7 +699,7 @@ kissvg_Path2D *kissvg_CreatePath2D(kissvg_TwoVector start,
     return path;
 }
 
-void kissvg_AppendPath2D(kissvg_Path2D *path, kissvg_TwoVector P)
+void kissvg_AppendPath2D(kissvg_Path2D *path, tmpl_TwoVector P)
 {
     long new_path_size;
 
@@ -732,7 +732,7 @@ void kissvg_DestroyPath2D(kissvg_Path2D **path_pointer)
 {
     long n, N_Arrows;
     kissvg_Arrow **current_arrow;
-    kissvg_TwoVector *data;
+    tmpl_TwoVector *data;
     kissvg_Path2D *path;
 
     path = *path_pointer;
@@ -780,12 +780,12 @@ void kissvg_DestroyPath2D(kissvg_Path2D **path_pointer)
 void kissvg_Path2DCreateLabel(kissvg_Path2D *path, char *label_content,
                               double pos, int font_size,
                               int baseline_skip, double margins[4],
-                              kissvg_TwoVector shift,
+                              tmpl_TwoVector shift,
                               kissvg_Color *line_color)
 {
     kissvg_Canvas2D *canvas;
     kissvg_Label2D *label;
-    kissvg_TwoVector anchor;
+    tmpl_TwoVector anchor;
 
     canvas = kissvg_GetCanvas(path);
     kissvg_SetHasLabels(path, kissvg_True);
@@ -806,13 +806,13 @@ void kissvg_Path2DCreateLabel(kissvg_Path2D *path, char *label_content,
 
 void kissvg_Path2DAddLabel(kissvg_Path2D *path, char *label_content,
                            double pos, int font_size, int baseline_skip,
-                           double margins[4], kissvg_TwoVector shift,
+                           double margins[4], tmpl_TwoVector shift,
                            kissvg_Color *line_color)
 {
 
     kissvg_Canvas2D *canvas;
     kissvg_Label2D *label;
-    kissvg_TwoVector anchor;
+    tmpl_TwoVector anchor;
 
     canvas = kissvg_GetCanvas(path);
 
@@ -835,7 +835,7 @@ void kissvg_Path2DAddLabel(kissvg_Path2D *path, char *label_content,
 void kissvg_Path2DCreateEasyLabel(kissvg_Path2D *path,
                                   char *label_content,
                                   double pos, int font_size,
-                                  kissvg_TwoVector shift)
+                                  tmpl_TwoVector shift)
 {
     double margins[4];
 
@@ -853,7 +853,7 @@ void kissvg_Path2DCreateEasyLabel(kissvg_Path2D *path,
 extern void kissvg_Path2DAddEasyLabel(kissvg_Path2D *path,
                                       char *label_content,
                                       double pos, int font_size,
-                                      kissvg_TwoVector shift)
+                                      tmpl_TwoVector shift)
 {
     double margins[4];
 
@@ -877,8 +877,8 @@ extern void kissvg_Path2DAddEasyLabel(kissvg_Path2D *path,
  ******************************************************************************/
 
 void kissvg_Axis2DCreateTicks(kissvg_Axis2D *axis,
-                              kissvg_TwoVector P,
-                              kissvg_TwoVector Q)
+                              tmpl_TwoVector P,
+                              tmpl_TwoVector Q)
 {
     kissvg_Axis2DUseTicks(axis, kissvg_True);
     axis->tick_start = P;
@@ -923,19 +923,19 @@ void kissvg_Axis2DSetTickSemiSemiHeight(kissvg_Axis2D *axis,
     return;
 }
 
-void kissvg_Axis2DSetAxisStart(kissvg_Axis2D *axis, kissvg_TwoVector P)
+void kissvg_Axis2DSetAxisStart(kissvg_Axis2D *axis, tmpl_TwoVector P)
 {
     axis->start = P;
     return;
 }
 
-void kissvg_Axis2DSetAxisFinish(kissvg_Axis2D *axis, kissvg_TwoVector P)
+void kissvg_Axis2DSetAxisFinish(kissvg_Axis2D *axis, tmpl_TwoVector P)
 {
     axis->finish = P;
     return;
 }
 
-void kissvg_Axis2DUseTicks(kissvg_Axis2D *axis, kissvg_Bool ticks)
+void kissvg_Axis2DUseTicks(kissvg_Axis2D *axis, tmpl_Bool ticks)
 {
     axis->has_ticks = ticks;
     return;
@@ -981,8 +981,8 @@ void kissvg_Axis2DAddArrow(kissvg_Axis2D *axis, double pos, double arrow_size,
     return;
 }
 
-kissvg_Axis2D *kissvg_CreateAxis2D(kissvg_TwoVector start,
-                                   kissvg_TwoVector finish,
+kissvg_Axis2D *kissvg_CreateAxis2D(tmpl_TwoVector start,
+                                   tmpl_TwoVector finish,
                                    kissvg_Canvas2D *canvas)
 {
     kissvg_Axis2D *axis;
@@ -1057,8 +1057,8 @@ void kissvg_Axis2DChangeEndArrow(kissvg_Axis2D *axis, double pos,
 }
 
 void kissvg_ResetAxis2D(kissvg_Axis2D* axis,
-                        kissvg_TwoVector start,
-                        kissvg_TwoVector finish)
+                        tmpl_TwoVector start,
+                        tmpl_TwoVector finish)
 {
     axis->start = start;
     axis->finish = finish;
@@ -1093,50 +1093,50 @@ void kissvg_DestroyAxis2D(kissvg_Axis2D *axis)
  ******************************************************************************
  ******************************************************************************/
 
-typedef void (*__arrow_func)(cairo_t *cr, kissvg_TwoVector P1,
-                             kissvg_TwoVector Q, double arrow_size,
+typedef void (*__arrow_func)(cairo_t *cr, tmpl_TwoVector P1,
+                             tmpl_TwoVector Q, double arrow_size,
                              kissvg_Color *fill_color, kissvg_Color *line_color,
                              double line_width, kissvg_Canvas2D *canvas);
 
 static void kissvg_DrawStealthArrow(cairo_t *cr,
-                                    kissvg_TwoVector P1,
-                                    kissvg_TwoVector Q,
+                                    tmpl_TwoVector P1,
+                                    tmpl_TwoVector Q,
                                     double arrow_size,
                                     kissvg_Color *fill_color,
                                     kissvg_Color *line_color,
                                     double line_width,
                                     kissvg_Canvas2D *canvas)
 {
-    kissvg_TwoVector A0, A1, A2;
+    tmpl_TwoVector A0, A1, A2;
     kissvg_TwoByTwoMatrix R;
     double x, y;
 
-    A0 = kissvg_TwoVectorScale(arrow_size, Q);
+    A0 = tmpl_2DDouble_Scale(arrow_size, &Q);
 
     R  = kissvg_RotationMatrix2D(5.0*M_PI/6.0);
-    A1 = kissvg_TwoVectorMatrixTransform(R, A0);
+    A1 = tmpl_TwoVectorMatrixTransform(R, A0);
 
     R  = kissvg_RotationMatrix2D(7.0*M_PI/6.0);
-    A2 = kissvg_TwoVectorMatrixTransform(R, A0);
+    A2 = tmpl_TwoVectorMatrixTransform(R, A0);
 
-    A0 = kissvg_TwoVectorAdd(A0, P1);
-    A1 = kissvg_TwoVectorAdd(A1, P1);
-    A2 = kissvg_TwoVectorAdd(A2, P1);
+    A0 = tmpl_2DDouble_Add(&A0, &P1);
+    A1 = tmpl_2DDouble_Add(&A1, &P1);
+    A2 = tmpl_2DDouble_Add(&A2, &P1);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A0));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A0));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A0));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A0));
     cairo_move_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A1));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A1));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A1));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A1));
     cairo_line_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(P1));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(P1));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(P1));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&P1));
     cairo_line_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A2));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A2));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A2));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A2));
     cairo_line_to(cr, x, y);
 
     cairo_close_path(cr);
@@ -1182,40 +1182,40 @@ static void kissvg_DrawStealthArrow(cairo_t *cr,
 }
 
 static void kissvg_DrawTriangularArrow(cairo_t *cr,
-                                      kissvg_TwoVector P1,
-                                      kissvg_TwoVector Q,
+                                      tmpl_TwoVector P1,
+                                      tmpl_TwoVector Q,
                                       double arrow_size,
                                       kissvg_Color *fill_color,
                                       kissvg_Color *line_color,
                                       double line_width,
                                       kissvg_Canvas2D *canvas)
 {
-    kissvg_TwoVector A0, A1, A2;
+    tmpl_TwoVector A0, A1, A2;
     kissvg_TwoByTwoMatrix R;
     double x, y;
 
-    A0 = kissvg_TwoVectorScale(arrow_size, Q);
+    A0 = tmpl_2DDouble_Scale(arrow_size, &Q);
 
     R  = kissvg_RotationMatrix2D(5.0*M_PI/6.0);
-    A1 = kissvg_TwoVectorMatrixTransform(R, A0);
+    A1 = tmpl_TwoVectorMatrixTransform(R, A0);
 
     R  = kissvg_RotationMatrix2D(7.0*M_PI/6.0);
-    A2 = kissvg_TwoVectorMatrixTransform(R, A0);
+    A2 = tmpl_TwoVectorMatrixTransform(R, A0);
 
-    A0 = kissvg_TwoVectorAdd(A0, P1);
-    A1 = kissvg_TwoVectorAdd(A1, P1);
-    A2 = kissvg_TwoVectorAdd(A2, P1);
+    A0 = tmpl_2DDouble_Add(&A0, &P1);
+    A1 = tmpl_2DDouble_Add(&A1, &P1);
+    A2 = tmpl_2DDouble_Add(&A2, &P1);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A0));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A0));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A0));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A0));
     cairo_move_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A1));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A1));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A1));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A1));
     cairo_line_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A2));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A2));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A2));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A2));
     cairo_line_to(cr, x, y);
 
     cairo_close_path(cr);
@@ -1263,73 +1263,73 @@ static void kissvg_DrawTriangularArrow(cairo_t *cr,
 }
 
 static void kissvg_DrawLatexArrow(cairo_t *cr,
-                                  kissvg_TwoVector P1,
-                                  kissvg_TwoVector Q,
+                                  tmpl_TwoVector P1,
+                                  tmpl_TwoVector Q,
                                   double arrow_size,
                                   kissvg_Color *fill_color,
                                   kissvg_Color *line_color,
                                   double line_width,
                                   kissvg_Canvas2D *canvas)
 {
-    kissvg_TwoVector A0, A1, A2, O, extra, B0, B1;
+    tmpl_TwoVector A0, A1, A2, O, extra, B0, B1;
     kissvg_TwoByTwoMatrix R;
     double x, y, ox, oy, bx0, by0, bx1, by1;
 
-    A0 = kissvg_TwoVectorScale(arrow_size, Q);
+    A0 = tmpl_2DDouble_Scale(arrow_size, &Q);
 
-    extra = kissvg_TwoVectorScale(0.05, Q);
+    extra = tmpl_2DDouble_Scale(0.05, &Q);
 
     R  = kissvg_RotationMatrix2D(5.0*M_PI/6.0);
-    A1 = kissvg_TwoVectorMatrixTransform(R, A0);
+    A1 = tmpl_TwoVectorMatrixTransform(R, A0);
 
     R  = kissvg_RotationMatrix2D(7.0*M_PI/6.0);
-    A2 = kissvg_TwoVectorMatrixTransform(R, A0);
+    A2 = tmpl_TwoVectorMatrixTransform(R, A0);
 
     B0 = kissvg_EuclideanMidPoint2D(A0, A1);
     B1 = kissvg_EuclideanMidPoint2D(A0, A2);
 
-    B0 = kissvg_TwoVectorScale(0.5, B0);
-    B1 = kissvg_TwoVectorScale(0.5, B1);
+    B0 = tmpl_2DDouble_Scale(0.5, &B0);
+    B1 = tmpl_2DDouble_Scale(0.5, &B1);
 
-    A0 = kissvg_TwoVectorScale(0.8, A0);
+    A0 = tmpl_2DDouble_Scale(0.8, &A0);
 
-    A0 = kissvg_TwoVectorAdd(A0, P1);
-    A1 = kissvg_TwoVectorAdd(A1, P1);
-    A2 = kissvg_TwoVectorAdd(A2, P1);
-    B0 = kissvg_TwoVectorAdd(B0, P1);
-    B1 = kissvg_TwoVectorAdd(B1, P1);
+    A0 = tmpl_2DDouble_Add(&A0, &P1);
+    A1 = tmpl_2DDouble_Add(&A1, &P1);
+    A2 = tmpl_2DDouble_Add(&A2, &P1);
+    B0 = tmpl_2DDouble_Add(&B0, &P1);
+    B1 = tmpl_2DDouble_Add(&B1, &P1);
 
-    A0 = kissvg_TwoVectorAdd(A0, extra);
-    A1 = kissvg_TwoVectorAdd(A1, extra);
-    A2 = kissvg_TwoVectorAdd(A2, extra);
-    B0 = kissvg_TwoVectorAdd(B0, extra);
-    B1 = kissvg_TwoVectorAdd(B1, extra);
+    A0 = tmpl_2DDouble_Add(&A0, &extra);
+    A1 = tmpl_2DDouble_Add(&A1, &extra);
+    A2 = tmpl_2DDouble_Add(&A2, &extra);
+    B0 = tmpl_2DDouble_Add(&B0, &extra);
+    B1 = tmpl_2DDouble_Add(&B1, &extra);
 
     O = kissvg_EuclideanMidPoint2D(P1, A0);
 
-    ox = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(O));
-    oy = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(O));
+    ox = canvas->TransformX(canvas, tmpl_2DDouble_X(&O));
+    oy = canvas->TransformY(canvas, tmpl_2DDouble_Y(&O));
 
-    bx0 = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(B0));
-    by0 = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(B0));
+    bx0 = canvas->TransformX(canvas, tmpl_2DDouble_X(&B0));
+    by0 = canvas->TransformY(canvas, tmpl_2DDouble_Y(&B0));
 
-    bx1 = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(B1));
-    by1 = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(B1));
+    bx1 = canvas->TransformX(canvas, tmpl_2DDouble_X(&B1));
+    by1 = canvas->TransformY(canvas, tmpl_2DDouble_Y(&B1));
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A0));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A0));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A0));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A0));
     cairo_move_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A1));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A1));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A1));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A1));
     cairo_curve_to(cr, ox, oy, bx0, by0, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A2));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A2));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A2));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A2));
     cairo_line_to(cr, x, y);
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(A0));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(A0));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&A0));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&A0));
     cairo_curve_to(cr, bx1, by1, ox, oy, x, y);
 
     cairo_close_path(cr);
@@ -1378,12 +1378,12 @@ static void kissvg_DrawLatexArrow(cairo_t *cr,
 
 static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
 {
-    kissvg_TwoVector Q;
-    kissvg_TwoVector P0, P1;
+    tmpl_TwoVector Q;
+    tmpl_TwoVector P0, P1;
     kissvg_Canvas2D *canvas;
     kissvg_Color *line_color, *fill_color;
     kissvg_Arrow *arrow;
-    kissvg_Bool reverse_arrow;
+    tmpl_Bool reverse_arrow;
     __arrow_func DrawArrows;
     double norm;
     double arrow_size, arrow_line_width;
@@ -1401,7 +1401,7 @@ static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
 
     P0 = kissvg_Path2DData(path)[0];
     P1 = kissvg_Path2DData(path)[1];
-    Q = kissvg_TwoVectorSubtract(P1, P0);
+    Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
     norm = kissvg_EuclideanNorm2D(Q);
     path_length = norm;
@@ -1411,7 +1411,7 @@ static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
     {
         P0 = kissvg_Path2DData(path)[n];
         P1 = kissvg_Path2DData(path)[n+1];
-        Q = kissvg_TwoVectorSubtract(P1, P0);
+        Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
         norm = kissvg_EuclideanNorm2D(Q);
 
@@ -1472,11 +1472,11 @@ static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
             P1 = kissvg_Path2DData(path)[1];
 
             if (reverse_arrow)
-                Q = kissvg_TwoVectorSubtract(P0, P1);
+                Q = tmpl_2DDouble_Subtract(&P0, &P1);
             else
-                Q = kissvg_TwoVectorSubtract(P1, P0);
+                Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
-            Q = kissvg_TwoVectorScale(1.0/norm, Q);
+            Q = tmpl_2DDouble_Scale(1.0/norm, &Q);
 
             DrawArrows(cr, P0, Q, arrow_size, fill_color,
                        line_color, arrow_line_width, canvas);
@@ -1500,11 +1500,11 @@ static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
             P1 = kissvg_Path2DData(path)[N-1];
 
             if (reverse_arrow)
-                Q = kissvg_TwoVectorSubtract(P0, P1);
+                Q = tmpl_2DDouble_Subtract(&P0, &P1);
             else
-                Q = kissvg_TwoVectorSubtract(P1, P0);
+                Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
-            Q = kissvg_TwoVectorScale(1.0/norm, Q);
+            Q = tmpl_2DDouble_Scale(1.0/norm, &Q);
 
             DrawArrows(cr, P1, Q, arrow_size, fill_color,
                        line_color, arrow_line_width, canvas);
@@ -1525,7 +1525,7 @@ static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
 
             P0 = kissvg_Path2DData(path)[current_arrow_pos];
             P1 = kissvg_Path2DData(path)[current_arrow_pos+1];
-            Q = kissvg_TwoVectorSubtract(P1, P0);
+            Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
             norm = kissvg_EuclideanNorm2D(Q);
 
@@ -1540,18 +1540,18 @@ static void kissvg_DrawPolygonalArrows(cairo_t *cr, kissvg_Path2D *path)
                 exit(0);
             }
 
-            Q = kissvg_TwoVectorScale(1.0/norm, Q);
+            Q = tmpl_2DDouble_Scale(1.0/norm, &Q);
             norm = arr_pos_length-path_norms[current_arrow_pos-1];
-            Q = kissvg_TwoVectorScale(norm, Q);
-            P1 = kissvg_TwoVectorAdd(P0, Q);
+            Q = tmpl_2DDouble_Scale(norm, &Q);
+            P1 = tmpl_2DDoubl_Add(&P0, &Q);
 
             if (reverse_arrow)
-                Q = kissvg_TwoVectorSubtract(P0, P1);
+                Q = tmpl_2DDouble_Subtract(&P0, &P1);
             else
-                Q = kissvg_TwoVectorSubtract(P1, P0);
+                Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
             norm = kissvg_EuclideanNorm2D(Q);
-            Q = kissvg_TwoVectorScale(1.0/norm, Q);
+            Q = tmpl_2DDouble_Scale(1.0/norm, &Q);
             DrawArrows(cr, P1, Q, arrow_size, fill_color,
                        line_color, arrow_line_width, canvas);
         }
@@ -1564,7 +1564,7 @@ void kissvg_DrawPolygon2D(cairo_t *cr, kissvg_Path2D *path)
 {
     double x, y;
     long n, path_size;
-    kissvg_TwoVector Pn;
+    tmpl_TwoVector Pn;
     kissvg_Color *color;
     kissvg_Canvas2D *canvas;
 
@@ -1583,16 +1583,16 @@ void kissvg_DrawPolygon2D(cairo_t *cr, kissvg_Path2D *path)
 
     Pn = kissvg_Path2DData(path)[0];
 
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(Pn));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(Pn));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&Pn));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&Pn));
 
     cairo_move_to(cr, x, y);
 
     for (n=1; n<path_size; ++n)
     {
         Pn = kissvg_Path2DData(path)[n];
-        x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(Pn));
-        y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(Pn));
+        x = canvas->TransformX(canvas, tmpl_2DDouble_X(&Pn));
+        y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&Pn));
         cairo_line_to(cr, x, y);
     }
 
@@ -1629,7 +1629,7 @@ void kissvg_FillDrawPolygon2D(cairo_t *cr, kissvg_Path2D *path)
 {
     double x, y;
     long n, path_size;
-    kissvg_TwoVector Pn;
+    tmpl_TwoVector Pn;
     kissvg_Color *color;
     kissvg_Canvas2D *canvas;
 
@@ -1647,16 +1647,16 @@ void kissvg_FillDrawPolygon2D(cairo_t *cr, kissvg_Path2D *path)
     }
 
     Pn = kissvg_Path2DData(path)[0];
-    x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(Pn));
-    y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(Pn));
+    x = canvas->TransformX(canvas, tmpl_2DDouble_X(&Pn));
+    y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&Pn));
 
     cairo_move_to(cr, x, y);
 
     for (n=1; n<path_size; ++n)
     {
         Pn = kissvg_Path2DData(path)[n];
-        x = canvas->TransformX(canvas, kissvg_TwoVectorXComponent(Pn));
-        y = canvas->TransformY(canvas, kissvg_TwoVectorYComponent(Pn));
+        x = canvas->TransformX(canvas, tmpl_2DDouble_X(&Pn));
+        y = canvas->TransformY(canvas, tmpl_2DDouble_Y(&Pn));
 
         cairo_line_to(cr, x, y);
     }
@@ -1711,8 +1711,8 @@ void kissvg_FillDrawPolygon2D(cairo_t *cr, kissvg_Path2D *path)
 
 void kissvg_DrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
 {
-    kissvg_TwoVector P;
-    kissvg_TwoVector center;
+    tmpl_TwoVector P;
+    tmpl_TwoVector center;
     kissvg_Path2D *path;
     double radius;
     double theta;
@@ -1727,8 +1727,8 @@ void kissvg_DrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
     center = kissvg_CircleCenter(circle);
     radius = kissvg_CircleRadius(circle);
 
-    P = kissvg_NewTwoVector(radius, 0.0);
-    P = kissvg_TwoVectorAdd(center, P);
+    P = tmpl_2DDouble_Rect(radius, 0.0);
+    P = tmpl_2DDouble_Add(&center, &P);
 
     path = kissvg_CreatePath2D(P, circle->canvas);
 
@@ -1749,8 +1749,8 @@ void kissvg_DrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
         x = radius*cos(theta);
         y = radius*sin(theta);
 
-        P = kissvg_NewTwoVector(x, y);
-        P = kissvg_TwoVectorAdd(P, center);
+        P = tmpl_2DDouble_Rect(x, y);
+        P = tmpl_2DDouble_Add(&P, &center);
         kissvg_AppendPath2D(path, P);
     }
 
@@ -1763,8 +1763,8 @@ void kissvg_DrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
 
 void kissvg_FillDrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
 {
-    kissvg_TwoVector P;
-    kissvg_TwoVector center;
+    tmpl_TwoVector P;
+    tmpl_TwoVector center;
     kissvg_Path2D *path;
     double radius;
     double theta;
@@ -1780,7 +1780,7 @@ void kissvg_FillDrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
     radius = kissvg_CircleRadius(circle);
 
     P = kissvg_NewTwoVector(radius, 0.0);
-    P = kissvg_TwoVectorAdd(center, P);
+    P = tmpl_TwoVectorAdd(center, P);
 
     path = kissvg_CreatePath2D(P, circle->canvas);
 
@@ -1802,7 +1802,7 @@ void kissvg_FillDrawCircle2D(cairo_t *cr, kissvg_Circle *circle)
         y = radius*sin(theta);
 
         P = kissvg_NewTwoVector(x, y);
-        P = kissvg_TwoVectorAdd(P, center);
+        P = tmpl_TwoVectorAdd(P, center);
         kissvg_AppendPath2D(path, P);
     }
 
@@ -1817,9 +1817,9 @@ void kissvg_DrawAxis2D(cairo_t *cr, kissvg_Axis2D *axis)
 {
     kissvg_Path2D *path;
     kissvg_Path2D *tick_path;
-    kissvg_TwoVector dxtick, dytick, tick;
-    kissvg_TwoVector tick_top, tick_bottom;
-    kissvg_TwoVector tick_perp, tick_perp_semi, tick_perp_semi_semi;
+    tmpl_TwoVector dxtick, dytick, tick;
+    tmpl_TwoVector tick_top, tick_bottom;
+    tmpl_TwoVector tick_perp, tick_perp_semi, tick_perp_semi_semi;
     long n, N_Ticks;
     double norm;
     double tick_factor;
@@ -1852,7 +1852,7 @@ void kissvg_DrawAxis2D(cairo_t *cr, kissvg_Axis2D *axis)
             exit(0);
         }
 
-        dxtick = kissvg_TwoVectorSubtract(axis->tick_finish, axis->tick_start);
+        dxtick = tmpl_TwoVectorSubtract(axis->tick_finish, axis->tick_start);
         norm = kissvg_EuclideanNorm2D(dxtick);
 
         if (norm == 0)
@@ -1872,10 +1872,10 @@ void kissvg_DrawAxis2D(cairo_t *cr, kissvg_Axis2D *axis)
 
         tick = kissvg_EuclideanOrthogonalVector2D(dxtick);
 
-        dxtick = kissvg_TwoVectorScale(dist/norm, dxtick);
-        tick_perp = kissvg_TwoVectorScale(height, tick);
-        tick_perp_semi = kissvg_TwoVectorScale(semi_height, tick);
-        tick_perp_semi_semi = kissvg_TwoVectorScale(semi_semi_height, tick);
+        dxtick = tmpl_TwoVectorScale(dist/norm, dxtick);
+        tick_perp = tmpl_TwoVectorScale(height, tick);
+        tick_perp_semi = tmpl_TwoVectorScale(semi_height, tick);
+        tick_perp_semi_semi = tmpl_TwoVectorScale(semi_semi_height, tick);
 
         N_Ticks = (long)(norm/dist);
 
@@ -1893,12 +1893,12 @@ void kissvg_DrawAxis2D(cairo_t *cr, kissvg_Axis2D *axis)
             if (axis->down_ticks)
                 tick_top = tick;
             else
-                tick_top = kissvg_TwoVectorAdd(tick, dytick);
+                tick_top = tmpl_TwoVectorAdd(tick, dytick);
 
             if (axis->up_ticks)
                 tick_bottom = tick;
             else
-                tick_bottom = kissvg_TwoVectorSubtract(tick, dytick);
+                tick_bottom = tmpl_TwoVectorSubtract(tick, dytick);
 
             tick_path = kissvg_CreatePath2D(tick_bottom, axis->canvas);
             kissvg_AppendPath2D(tick_path, tick_top);
@@ -1907,7 +1907,7 @@ void kissvg_DrawAxis2D(cairo_t *cr, kissvg_Axis2D *axis)
             kissvg_SetLineColor(tick_path, kissvg_Axis2DTickColor(axis));
             kissvg_DrawPolygon2D(cr, tick_path);
             kissvg_DestroyPath2D(&tick_path);
-            tick = kissvg_TwoVectorAdd(tick, dxtick);
+            tick = tmpl_TwoVectorAdd(tick, dxtick);
         }
     }
 
@@ -1920,13 +1920,16 @@ void kissvg_DrawAxis2D(cairo_t *cr, kissvg_Axis2D *axis)
 void kissvg_DrawLine2D(cairo_t *cr, kissvg_Line2D *line, double t0, double t1)
 {
     kissvg_Path2D *path;
-    kissvg_TwoVector A, B, P, V;
+    tmpl_TwoVector A, B, P, V;
 
     P = kissvg_Line2DPoint(line);
     V = kissvg_Line2DTangent(line);
 
-    A = kissvg_TwoVectorAdd(P,kissvg_TwoVectorScale(t0, V));
-    B = kissvg_TwoVectorAdd(P,kissvg_TwoVectorScale(t1, V));
+    A = tmpl_2DDouble_Scale(t0, &V);
+    B = tmpl_2DDouble_Scale(t1, &V);
+
+    A = tmpl_2DDouble_Add(&P, &A);
+    B = tmpl_TwoVectorAdd(&P, &B);;
 
     path = kissvg_CreatePath2D(A, line->canvas);
 
