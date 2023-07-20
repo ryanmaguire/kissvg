@@ -1,0 +1,31 @@
+#include <kissvg/include/kissvg_color.h>
+
+const kissvg_Color kissvg_Blue = {{0.00, 0.20, 1.00}};
+const kissvg_Color kissvg_Green = {{0.00, 1.00, 0.10}};
+const kissvg_Color kissvg_Red = {{1.00, 0.10, 0.10}};
+const kissvg_Color kissvg_Black = {{0.00, 0.00, 0.00}};
+const kissvg_Color kissvg_White = {{1.00, 1.00, 1.00}};
+const kissvg_Color kissvg_DarkGray = {{0.30, 0.30, 0.30}};
+const kissvg_Color kissvg_Gray = {{0.60, 0.60, 0.60}};
+const kissvg_Color kissvg_LightGray = {{0.80, 0.80, 0.80}};
+const kissvg_Color kissvg_Aqua = {{0.10, 1.00, 1.00}};
+const kissvg_Color kissvg_Purple = {{0.70, 0.00, 1.00}};
+const kissvg_Color kissvg_Violet = {{0.50, 0.00, 1.00}};
+const kissvg_Color kissvg_Pink = {{1.00, 0.40, 1.00}};
+const kissvg_Color kissvg_Yellow = {{1.00, 1.00, 0.20}};
+const kissvg_Color kissvg_Crimson = {{0.80, 0.00, 0.13}};
+const kissvg_Color kissvg_DarkGreen = {{0.25, 0.50, 0.00}};
+const kissvg_Color kissvg_Orange = {{1.00, 0.40, 0.10}};
+const kissvg_Color kissvg_LightBlue = {{0.60, 0.80, 1.00}};
+const kissvg_Color kissvg_Teal = {{0.00, 0.50, 0.50}};
+const kissvg_Color kissvg_DarkBlue = {{0.00, 0.00, 0.60}};
+const kissvg_Color kissvg_Lavender = {{0.80, 0.83, 1.00}};
+const kissvg_Color kissvg_Magenta = {{1.00, 0.11, 0.81}};
+const kissvg_Color kissvg_DeepPink = {{1.00, 0.08, 0.58}};
+const kissvg_Color kissvg_Marine = {{0.30, 0.30, 1.00}};
+const kissvg_Color kissvg_Lime = {{0.75, 0.90, 0.00}};
+const kissvg_Color kissvg_Carrot = {{1.00, 0.65, 0.30}};
+const kissvg_Color kissvg_Brown = {{0.30, 0.15, 0.00}};
+const kissvg_Color kissvg_Azure = {{0.00, 0.50, 1.00}};
+const kissvg_Color kissvg_Silver = {{0.75, 0.75, 0.75}};
+const kissvg_Color kissvg_Sand = {{0.93, 0.84, 0.25}};

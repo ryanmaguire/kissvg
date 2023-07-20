@@ -40,7 +40,7 @@
 #include <libtmpl/include/tmpl_vec2.h>
 
 /*  The main headers for kissvg are located here.                             */
-#include "kissvg.h"
+#include <kissvg/include/kissvg.h>
 
 /*  Currently we use the cairo backends for producing the output files.       */
 #include <cairo/cairo.h>
@@ -179,8 +179,8 @@ kissvg_Canvas *kissvg_Create_Canvas(double x_inches, double y_inches,
     /*  Set the TransformX and TransformY functions to point to the addresses *
      *  associated to the __kissvg_CanvasTransformX and                       *
      *  __kissvg_CanvasTransformY functions, respectively.                    */
-    *X_Transform_pointer = &__kissvg_CanvasTransformX;
-    *Y_Transform_pointer = &__kissvg_CanvasTransformY;
+    *X_Transform_pointer = &__kissvg_Canvas_X_Transform;
+    *Y_Transform_pointer = &__kissvg_Canvas_Y_Transform;
 
     /*  Set the filetype attribute to the requested type and return.          */
     *filetype_pointer = filetype;
@@ -251,7 +251,7 @@ static void __check_arrow_error(kissvg_Arrow *arrow, char *FuncName)
     }
 
     /*  If the input arrow has an error set, abort the computation.           */
-    if (kissvg_HasError(arrow))
+    if (kissvg_Has_Error(arrow))
     {
         printf("Error Encountered: KissVG\n"
                "\tFunction: %s\n\n"
@@ -259,12 +259,12 @@ static void __check_arrow_error(kissvg_Arrow *arrow, char *FuncName)
                "Printing Error Message:\n\n", FuncName);
 
         /*  If the error message is NULL, then it wasn't set. Print this.     */
-        if (kissvg_ErrorMessage(arrow) == NULL)
+        if (kissvg_Error_Message(arrow) == NULL)
             puts("Input circle did not have an error message set.\n\n");
 
         /*  Otherwise, simply print the message.                              */
         else
-            puts(kissvg_ErrorMessage(arrow));
+            puts(kissvg_Error_Message(arrow));
 
         /*  Abort the computation.                                            */
         exit(0);
@@ -351,12 +351,12 @@ kissvg_Arrow *kissvg_CreateArrow(double pos,
     }
 
     /*  Get a pointer to the error message inside the arrow.                  */
-    arrow_mes_pointer = &kissvg_ErrorMessage(arrow);
+    arrow_mes_pointer = &kissvg_Error_Message(arrow);
 
     /*  If the size value is negative, set this as an error message.          */
     if (arrow_size < 0.0)
     {
-        kissvg_SetError(arrow, kissvg_True);
+        kissvg_Set_Error(arrow, kissvg_True);
         mes = "Error Encountered: KissVG\n"
               "\tFunction: kissvg_CreateArrow\n\n"
               "Input size is negative. Values must be non-negative.\n\n";
@@ -374,7 +374,7 @@ kissvg_Arrow *kissvg_CreateArrow(double pos,
     else
     {
         /*  Set the error occured variable to false.                          */
-        kissvg_SetError(arrow, kissvg_False);
+        kissvg_Set_Error(arrow, kissvg_False);
 
         /*  Set the actual error message (not it's pointer) to NULL.          */
         *arrow_mes_pointer = NULL;
@@ -414,10 +414,10 @@ void kissvg_DestroyArrow(kissvg_Arrow **arrow_pointer)
     arrow = *arrow_pointer;
 
     /*  If the arrow has an error message attached to it, free this.          */
-    if (kissvg_HasError(arrow))
+    if (kissvg_Has_Error(arrow))
     {
         /*  Extract the error message from the arrow and set this as err_mes. */
-        err_mes = kissvg_ErrorMessage(arrow);
+        err_mes = kissvg_Error_Message(arrow);
 
         /*  Check that the pointer isn't NULL before free'ing.                */
         if (err_mes != NULL)
@@ -472,7 +472,7 @@ static void __check_path_error(kissvg_Path2D *path, char *FuncName)
     }
 
     /*  If the input arrow has an error set, abort the computation.           */
-    if (kissvg_HasError(path))
+    if (kissvg_Has_Error(path))
     {
         printf("Error Encountered: KissVG\n"
                "\tFunction: %s\n\n"
@@ -480,12 +480,12 @@ static void __check_path_error(kissvg_Path2D *path, char *FuncName)
                "Printing Error Message:\n\n", FuncName);
 
         /*  If the error message is NULL, then it wasn't set. Print this.     */
-        if (kissvg_ErrorMessage(path) == NULL)
+        if (kissvg_Error_Message(path) == NULL)
             puts("Input circle did not have an error message set.\n\n");
 
         /*  Otherwise, simply print the message.                              */
         else
-            puts(kissvg_ErrorMessage(path));
+            puts(kissvg_Error_Message(path));
 
         /*  Abort the computation.                                            */
         exit(0);
@@ -520,7 +520,7 @@ static tmpl_TwoVector __GetPos(kissvg_Path2D *path, double pos)
     P1 = kissvg_Path2DData(path)[1];
     Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
-    norm = kissvg_EuclideanNorm2D(Q);
+    norm = tmpl_2DDouble_L2_Norm(&Q);
     path_length = norm;
     path_norms[0] = norm;
 
@@ -530,7 +530,7 @@ static tmpl_TwoVector __GetPos(kissvg_Path2D *path, double pos)
         P1 = kissvg_Path2DData(path)[n+1];
         Q = tmpl_2DDouble_Subtract(&P1, &P0);
 
-        norm = kissvg_EuclideanNorm2D(Q);
+        norm = tmpl_2DDouble_L2_Norm(&Q);
 
         path_length += norm;
         path_norms[n] = path_length;
@@ -577,7 +577,7 @@ static tmpl_TwoVector __GetPos(kissvg_Path2D *path, double pos)
         else
         {
             Q = tmpl_2DDouble_Scale(1.0/norm, &Q);
-            norm = pos_length-path_norms[current_pos-1];
+            norm = pos_length - path_norms[current_pos-1];
             Q = tmpl_2DDouble_Scale(norm, &Q);
             out = tmpl_2DDouble_Add(&P0, &Q);
         }

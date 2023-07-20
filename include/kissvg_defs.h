@@ -116,18 +116,7 @@ struct kissvg_Canvas {
     kissvg_CanvasTransform Y_Transform;
 };
 
-/*  This is the primary structure for using colors in drawings. It is a       *
- *  structure which contains an array of three double corresponding to Red,   *
- *  Green, and Blue (in that order). Functions and macros are providing for   *
- *  setting these values so one should never have to do so directly. The      *
- *  Boolean has_transparency is used for determining if alpha composting      *
- *  should be used with the value alpha.                                      */
-typedef struct kissvg_Pen {
-    double dat[3];
-    double alpha;
-    double linewidth;
-    tmpl_Bool has_transparency;
-} kissvg_Pen;
+
 
 /*  Struct for adding labels to figures.                                      */
 typedef struct kissvg_Label2D {
