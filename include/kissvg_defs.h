@@ -116,19 +116,6 @@ struct kissvg_Canvas {
     kissvg_CanvasTransform Y_Transform;
 };
 
-
-
-/*  Struct for adding labels to figures.                                      */
-typedef struct kissvg_Label2D {
-    char *label_content;
-    int font_size;
-    int baseline_skip;
-    double margins[4];
-    kissvg_TwoVector anchor;
-    kissvg_TwoVector shift;
-    kissvg_Pen *pen;
-} kissvg_Label2D;
-
 /*  Enumerated list of arrow types. Currently only three are provided, which  *
  *  are modeled after the tikz arrows. A no-arrow option is also provided. If *
  *  you want to flip the direction, use the Reverse option, i.e. something    *
